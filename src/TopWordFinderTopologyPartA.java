@@ -15,37 +15,22 @@ import backtype.storm.tuple.Values;
  */
 public class TopWordFinderTopologyPartA {
 
-  public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
+        Config config = new Config();
+        config.setDebug(true);
+        config.setMaxTaskParallelism(3);
 
-    TopologyBuilder builder = new TopologyBuilder();
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.setSpout("spout", new RandomSentenceSpout());
+        builder.setBolt("split", new SplitSentenceBolt()).shuffleGrouping("spout");
+        builder.setBolt("count", new WordCountBolt()).fieldsGrouping("split", new Fields("word"));
 
-    Config config = new Config();
-    config.setDebug(true);
+        LocalCluster cluster = new LocalCluster();
+        cluster.submitTopology("word-count", config, builder.createTopology());
 
+        //wait for 60 seconds and then kill the topology
+        Thread.sleep(60 * 1000);
 
-    /*
-    ----------------------TODO-----------------------
-    Task: wire up the topology
-
-    NOTE:make sure when connecting components together, using the functions setBolt(name,…) and setSpout(name,…),
-    you use the following names for each component:
-
-    RandomSentanceSpout -> "spout"
-    SplitSentenceBolt -> "split"
-    WordCountBolt -> "count"
-
-
-    ------------------------------------------------- */
-
-
-    config.setMaxTaskParallelism(3);
-
-    LocalCluster cluster = new LocalCluster();
-    cluster.submitTopology("word-count", config, builder.createTopology());
-
-    //wait for 60 seconds and then kill the topology
-    Thread.sleep(60 * 1000);
-
-    cluster.shutdown();
-  }
+        cluster.shutdown();
+    }
 }
