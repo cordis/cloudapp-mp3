@@ -23,11 +23,11 @@ public class TopWordFinderTopologyPartD {
         config.setMaxTaskParallelism(3);
 
         TopologyBuilder builder = new TopologyBuilder();
-        builder.setSpout("spout", new FileReaderSpout(args[0]), 1);
+        builder.setSpout("spout", new FileReaderSpout(System.getProperty("user.dir") + "/" + args[0])).setNumTasks(1);
         builder.setBolt("split", new SplitSentenceBolt()).shuffleGrouping("spout");
-        builder.setBolt("normalize", new NormalizerBolt()).shuffleGrouping("count");
-        builder.setBolt("count", new WordCountBolt()).fieldsGrouping("split", new Fields("word"));
-        builder.setBolt("top-n", new TopNFinderBolt(10)).noneGrouping("normalize");
+        builder.setBolt("normalize", new NormalizerBolt()).shuffleGrouping("split");
+        builder.setBolt("count", new WordCountBolt()).fieldsGrouping("normalize", new Fields("word"));
+        builder.setBolt("top-n", new TopNFinderBolt(10)).allGrouping("count").setNumTasks(1);
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("word-count", config, builder.createTopology());
