@@ -24,7 +24,7 @@ public class FileReaderSpout implements IRichSpout {
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         this.context = context;
         this.collector = collector;
-        this.fileScanner = this.makeFileScanner((String)conf.get(this.filepath));
+        this.fileScanner = this.makeFileScanner(this.filepath);
     }
 
     private Scanner makeFileScanner(String filepath) {
@@ -43,7 +43,7 @@ public class FileReaderSpout implements IRichSpout {
         }
         else {
             try {
-                Thread.sleep(2 * 60 * 1000);
+                Thread.sleep(2 * 60 *1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

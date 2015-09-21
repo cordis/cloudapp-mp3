@@ -26,7 +26,7 @@ public class TopNFinderBolt extends BaseBasicBolt {
     public void execute(Tuple tuple, BasicOutputCollector collector) {
         String word = tuple.getStringByField("word");
         Integer count = tuple.getIntegerByField("count");
-        if (this.currentTopWords.containsKey(word)) {
+        if (this.currentTopWords.size() < this.N || this.currentTopWords.containsKey(word)) {
             this.currentTopWords.put(word, count);
         }
         else {
